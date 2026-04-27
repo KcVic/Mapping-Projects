@@ -71,8 +71,6 @@ var zoomControl = L.control.zoom({
     position: 'bottomleft'
 }).addTo(map);
 var bounds_group = new L.featureGroup([]);
-function setBounds() {
-}
 map.createPane('pane_GoogleHybrid_0');
 map.getPane('pane_GoogleHybrid_0').style.zIndex = 400;
 var layer_GoogleHybrid_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
@@ -84,8 +82,14 @@ var layer_GoogleHybrid_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y
     minNativeZoom: 0,
     maxNativeZoom: 20
 });
-layer_GoogleHybrid_0;
 map.addLayer(layer_GoogleHybrid_0);
+
+// Add OpenStreetMap tile layer
+var layer_OSM_0 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    minZoom: 1,
+    maxZoom: 28
+});
 map.createPane('pane_PotentialFloodZones_1');
 map.getPane('pane_PotentialFloodZones_1').style.zIndex = 401;
 var img_PotentialFloodZones_1 = 'qgis2web/data/PotentialFloodZones_1.png';
@@ -95,18 +99,6 @@ var layer_PotentialFloodZones_1 = new L.imageOverlay(img_PotentialFloodZones_1,
                                         {pane: 'pane_PotentialFloodZones_1'});
 bounds_group.addLayer(layer_PotentialFloodZones_1);
 map.addLayer(layer_PotentialFloodZones_1);
-// var overlaysTree = [
-//     {label: "Potential Flood Zones", layer: layer_PotentialFloodZones_1},
-//     {label: "Google Hybrid", layer: layer_GoogleHybrid_0, radioGroup: 'bm' },]
-// var lay = L.control.layers.tree(null, overlaysTree,{
-//     //namedToggle: true,
-//     //selectorBack: false,
-//     //closedSymbol: '&#8862; &#x1f5c0;',
-//     //openedSymbol: '&#8863; &#x1f5c1;',
-//     //collapseAll: 'Collapse all',
-//     //expandAll: 'Expand all',
-//     collapsed: true,
-// });
 
 
 // Use OpenStreetMap's free Nominatim API for geocoding
@@ -117,12 +109,15 @@ let searchMarker = null;
 async function performSearch() {
     const query = searchInput.value.trim();
     if (!query) return;
-    const url = `http://api.positionstack.com/v1/forward?access_key=YOUR_API_KEY&query=${encodeURIComponent(query + ', Abuja, Nigeria')}&limit=1`;
+    
+    // Use Nominatim (free, no API key needed)
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + ', Abuja, Nigeria')}&format=json&limit=1`;
 
     try {
         // Visual feedback during search
         const originalPlaceholder = searchInput.placeholder;
         searchInput.placeholder = "Searching...";
+        const searchedQuery = searchInput.value;
         searchInput.value = "";
 
         const response = await fetch(url);
@@ -145,8 +140,9 @@ async function performSearch() {
             // Add a new marker at the searched location
             searchMarker = L.marker([lat, lon]).addTo(map);
             
-            // Restore input
-            searchInput.value = query;
+            // Restore input with searched query
+            searchInput.value = searchedQuery;
+            searchInput.placeholder = originalPlaceholder;
         } else {
             // Handle not found
             searchInput.value = "";
@@ -157,7 +153,12 @@ async function performSearch() {
         }
     } catch (error) {
         console.error('Search error:', error);
+        searchInput.value = "";
         searchInput.placeholder = "Error connecting...";
+        setTimeout(() => {
+            const originalPlaceholder = "Search location (e.g., Lugbe)...";
+            searchInput.placeholder = originalPlaceholder;
+        }, 2000);
     }
 }
 
@@ -166,9 +167,9 @@ searchBtn.addEventListener('click', performSearch);
 
 // Trigger search on Enter key press
 searchInput.addEventListener('keypress', function (e) {
-if (e.key === 'Enter') {
-    performSearch();
-}
+    if (e.key === 'Enter') {
+        performSearch();
+    }
 });
 
 // My location functionality
@@ -205,8 +206,34 @@ map.on('locationerror', function(e) {
     }, 3000);
     console.error("Location error:", e.message);
 });
-lay.addTo(map);
-setBounds();
+
+// Layer switching functionality
+const layerToggles = document.querySelectorAll('.layer-toggle');
+layerToggles.forEach(button => {
+    button.addEventListener('click', function() {
+        const layer = this.getAttribute('data-layer');
+        
+        // Remove all active classes
+        layerToggles.forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
+        });
+        
+        // Add active class to clicked button
+        this.classList.remove('btn-outline-primary');
+        this.classList.add('btn-primary');
+        
+        // Switch layers
+        if (layer === 'google') {
+            map.removeLayer(layer_OSM_0);
+            map.addLayer(layer_GoogleHybrid_0);
+        } else if (layer === 'osm') {
+            map.removeLayer(layer_GoogleHybrid_0);
+            map.addLayer(layer_OSM_0);
+        }
+    });
+});
+
 L.ImageOverlay.include({
     getBounds: function () {
         return this._bounds;

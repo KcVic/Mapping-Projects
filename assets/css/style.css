@@ -19,9 +19,71 @@ html, body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
-.z-top { z-index: 1000; }
-.w-indicator { width: 0.5rem; height: 2rem; }
-.dot { width: 0.5rem; height: 0.5rem; }
-.text-xxs { font-size: 0.65rem; letter-spacing: 1px; }
-.text-xs { font-size: 0.75rem; }
-.icon-sm { width: 1.25rem; height: 1.25rem; }
+.z-top {
+    z-index: 1000; 
+}
+.w-indicator {
+    width: 0.5rem;
+    height: 2rem; 
+}
+.dot {
+    width: 0.5rem;
+    height: 0.5rem;
+}
+.text-xxs {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+}
+.text-xs {
+    font-size: 0.75rem;
+}
+.icon-sm {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.methodology-container {
+    max-width: 380px;
+    width: 100%; 
+}
+@media (max-width: 767.98px) {
+    .methodology-container {
+        max-width: 75vw;
+    }
+    .methodology-card {
+    padding: 0.75rem !important;
+    }
+    .methodology-text {
+        font-size: 0.65rem !important;
+        line-height: 1.4 !important;
+    }
+    .methodology-title {
+        font-size: 0.65rem !important;
+        letter-spacing: 0.05em !important;
+    }
+    .methodology-legend {
+        font-size: 0.55rem !important;
+    }
+    .icon-sm-mobile {
+        width: 1rem;
+        height: 1rem;
+    }
+}
+
+/* Layer Switcher */
+.layer-toggle {
+    transition: all 0.3s ease;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.layer-toggle:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 767.98px) {
+    .layer-toggle {
+        font-size: 0.65rem !important;
+        padding: 0.25rem 0.5rem !important;
+    }
+}
