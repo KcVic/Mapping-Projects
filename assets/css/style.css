@@ -86,4 +86,19 @@ html, body {
         font-size: 0.65rem !important;
         padding: 0.25rem 0.5rem !important;
     }
+    
+    /* Leaflet controls - reposition on mobile */
+    .leaflet-bottom {
+        bottom: 50px;
+    }
+    
+    .leaflet-attribution-flag {
+        display: none !important;
+    }
+    
+    .leaflet-attribution {
+        font-size: 0.7rem !important;
+        padding: 4px 8px !important;
+    }
+    
 }
